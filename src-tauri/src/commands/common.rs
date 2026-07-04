@@ -646,9 +646,13 @@ pub fn update_account_status(
 ) {
     account.status = calc_status(is_banned, is_auth_error, account.usage_data.as_ref());
 
-    // 只有封禁、失效、封顶状态才自动禁用账号
-    if matches!(account.status.as_str(), "banned" | "invalid" | "capped") {
+    // 只有封禁、失效状态才自动禁用账号（封顶状态下，账号依然保持 enabled，网关在选择可用账号时通过 is_available 动态排除）
+    if matches!(account.status.as_str(), "banned" | "invalid") {
         account.enabled = false;
+    } else if account.status == "active" && account.disabled_reason.is_none() && !account.enabled {
+        // 自愈：如果账号处于 active 状态，且没有禁用原因，但在 accounts.json 里 enabled 是 false，
+        // 判定为之前配额满误禁用后的配额恢复，自动恢复启用它
+        account.enabled = true;
     }
 }
 

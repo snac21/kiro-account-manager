@@ -60,3 +60,6 @@ MEMORY.md
 
 # Rust target directories (including custom profiles)
 src-tauri/target-*
+
+# Tauri generated files
+src-tauri/gen/
